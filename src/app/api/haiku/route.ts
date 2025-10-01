@@ -1,7 +1,14 @@
+import { auth } from "@/lib/auth"
 import { openai } from "@/lib/openai"
 import { NextRequest, NextResponse } from "next/server"
 
 export const POST = async (request: NextRequest) => {
+  const session = await auth.api.getSession({ headers: request.headers })
+
+  if (!session) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 })
+  }
+
   const payload = await request.json()
 
   if (!payload.body || !payload.tone) {
@@ -31,6 +38,8 @@ export const POST = async (request: NextRequest) => {
     "Summary: <one sentence, max 30 words>",
     "Keywords: <comma-separated list of up to 6 short phrases>",
     "Sentiment: <positive | neutral | negative>",
+    "Provide only plain text; no additional formatting or commentary.",
+    "Paraphrase or summarize any sensitive details instead of copying the email verbatim.",
     `Email: ${body}`,
   ].join("\n")
 
@@ -43,6 +52,7 @@ export const POST = async (request: NextRequest) => {
     "You craft haiku signatures for emails.",
     "Write a single haiku in three lines (5 syllables, 7 syllables, 5 syllables).",
     "Do not add labels or commentary—just the haiku lines.",
+    "Provide only the three haiku lines in plain text with no extra formatting or commentary.",
     `Tone: ${tone}`,
     `Context: ${context}`,
   ].join("\n")
@@ -52,15 +62,22 @@ export const POST = async (request: NextRequest) => {
     input: haikuPrompt,
   })
 
-  // Step 2: derive contextual summary clues for prompting
-  // Step 3: generate candidate haiku lines from the model
-  // Step 4: verify syllable structure and repair if needed
-  // Step 5: return the final haiku with companion metadata
+  const raw = haiku.trim().split(/\r?\n/)
+  const lines = raw.map((line) => line.trim())
 
-  return NextResponse.json({
-    status: "not-implemented",
-    payload: { body, tone },
-    context,
-    haiku,
-  })
+  if (lines.length !== 3) {
+    return NextResponse.json(
+      { error: "haiku must contain exactly three lines" },
+      { status: 502 },
+    )
+  }
+
+  if (lines.some((line) => line.length === 0)) {
+    return NextResponse.json(
+      { error: "haiku lines cannot be empty" },
+      { status: 502 },
+    )
+  }
+
+  return NextResponse.json({ haiku: lines, tone })
 }
