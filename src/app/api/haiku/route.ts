@@ -58,7 +58,7 @@ export const POST = async (request: NextRequest) => {
   ].join("\n")
 
   const { output_text: haiku } = await openai.responses.create({
-    model: "gpt-5",
+    model: "gpt-5-mini",
     input: haikuPrompt,
   })
 
