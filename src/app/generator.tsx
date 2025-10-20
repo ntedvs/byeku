@@ -6,9 +6,11 @@ export default function Generator() {
   const [body, setBody] = useState("")
   const [tone, setTone] = useState("serene")
   const [lines, setLines] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
 
   const submit = async (e: FormEvent) => {
     e.preventDefault()
+    setLoading(true)
 
     const { lines, error } = await fetch("/api/haiku", {
       method: "POST",
@@ -16,6 +18,7 @@ export default function Generator() {
     }).then((res) => res.json())
 
     if (!error) setLines(lines)
+    setLoading(false)
   }
 
   return (
@@ -41,7 +44,9 @@ export default function Generator() {
           <option value="corporate">Corporate</option>
         </select>
 
-        <button>Submit</button>
+        <button disabled={loading}>
+          {loading ? "Generating..." : "Generate"}
+        </button>
       </form>
 
       {lines.length > 0 && lines.map((line) => <p key={line}>{line}</p>)}

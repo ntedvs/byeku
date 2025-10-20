@@ -12,9 +12,9 @@ export const auth = betterAuth({
         const transporter = nodemailer.createTransport(process.env.EMAIL_SERVER)
 
         await transporter.sendMail({
-          from: "Oderum <auth@oderum.com>",
+          from: "Byeku <auth@oderum.com>",
           to: email,
-          subject: "Sign in to Oderum",
+          subject: "Sign in to Byeku",
           html: `<p>Click <a href=${url}>here</a> to sign in.</p>`,
         })
       },

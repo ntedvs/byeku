@@ -7,6 +7,7 @@ import { FormEvent, useState } from "react"
 export default function AuthForm() {
   const [email, setEmail] = useState("")
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const router = useRouter()
 
@@ -23,8 +24,9 @@ export default function AuthForm() {
       return
     }
 
+    setLoading(true)
     await client.signIn.magicLink({ email: clean })
-    router.push("/")
+    router.push("/verify")
   }
 
   return (
@@ -42,7 +44,7 @@ export default function AuthForm() {
 
       {error && <p>{error}</p>}
 
-      <button>Submit</button>
+      <button disabled={loading}>{loading ? "Sending..." : "Send Link"}</button>
     </form>
   )
 }

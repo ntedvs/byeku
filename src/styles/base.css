@@ -2,6 +2,6 @@
 
 @layer base {
   button {
-    @apply cursor-pointer;
+    @apply cursor-pointer disabled:cursor-not-allowed;
   }
 }
