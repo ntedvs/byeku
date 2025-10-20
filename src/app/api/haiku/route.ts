@@ -32,34 +32,15 @@ export const POST = async (request: NextRequest) => {
     return NextResponse.json({ error: "invalid tone" }, { status: 400 })
   }
 
-  const contextPrompt = [
-    "You prepare context for haiku email signatures.",
-    "Reply using exactly this format:",
-    "Summary: <one sentence, max 30 words>",
-    "Keywords: <comma-separated list of up to 6 short phrases>",
-    "Sentiment: <positive | neutral | negative>",
-    "Provide only plain text; no additional formatting or commentary.",
-    "Paraphrase or summarize any sensitive details instead of copying the email verbatim.",
-    `Email: ${body}`,
-  ].join("\n")
-
-  const { output_text: context } = await openai.responses.create({
-    model: "gpt-4o-mini",
-    input: contextPrompt,
-  })
-
-  const haikuPrompt = [
-    "You craft haiku signatures for emails.",
-    "Write a single haiku in three lines (5 syllables, 7 syllables, 5 syllables).",
-    "Do not add labels or commentary—just the haiku lines.",
-    "Provide only the three haiku lines in plain text with no extra formatting or commentary.",
-    `Tone: ${tone}`,
-    `Context: ${context}`,
-  ].join("\n")
-
   const { output_text: haiku } = await openai.responses.create({
-    model: "gpt-5-mini",
-    input: haikuPrompt,
+    model: "gpt-5-nano",
+    input: [
+      "You make haiku signatures for emails.",
+      "Write a single haiku in three lines.",
+      "Do not add labels or commentary.",
+      `Tone: ${tone}`,
+      `Body: ${body}`,
+    ].join("\n"),
   })
 
   const raw = haiku.trim().split(/\r?\n/)
@@ -79,5 +60,5 @@ export const POST = async (request: NextRequest) => {
     )
   }
 
-  return NextResponse.json({ haiku: lines, tone })
+  return NextResponse.json({ lines })
 }
